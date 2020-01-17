@@ -871,7 +871,7 @@ class BertForSequenceClassification(PreTrainedBertModel):
         logits = self.classifier(pooled_output)
 
         if labels is not None:
-            loss_fct = CrossEntropyLoss(weight=self.weight)
+            loss_fct = CrossEntropyLoss(weight=self.weight.to(logits.device))
             loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
             return loss
         else:

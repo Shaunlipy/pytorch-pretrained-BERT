@@ -861,14 +861,16 @@ class BertForSequenceClassification(PreTrainedBertModel):
         self.num_labels = num_labels
         self.bert = BertModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
-        self.classifier = nn.Linear(config.hidden_size, num_labels)
+        self.classifier1 = nn.Linear(config.hidden_size, 512)
+        self.classifier2 = nn.Linear(512, num_labels)
+        self.relu = nn.ReLU()
         self.weight = weight
         self.apply(self.init_bert_weights)
 
     def forward(self, input_ids, token_type_ids=None, attention_mask=None, labels=None):
         _, pooled_output = self.bert(input_ids, token_type_ids, attention_mask, output_all_encoded_layers=False)
         pooled_output = self.dropout(pooled_output)
-        logits = self.classifier(pooled_output)
+        logits = self.classifier2(self.relu(self.classifier1(pooled_output)))
 
         if labels is not None:
             loss_fct = CrossEntropyLoss(weight=self.weight.to(logits.device))
